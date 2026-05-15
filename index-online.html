@@ -7,66 +7,475 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
-        :root { --p: #07FFFF; --bg: #030303; --card: #0d0d0d; --g: #00ff88; --r: #ff3366; --gold: #ffcc00; }
-        * { box-sizing: border-box; font-family: 'Orbitron', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        :root { 
+            --p: #07FFFF; 
+            --bg: #030303; 
+            --card: #0d0d0d; 
+            --g: #00ff88; 
+            --r: #ff3366; 
+            --gold: #ffcc00;
+            --purple: #9d4edd;
+            --blue: #3a86ff;
+        }
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Orbitron', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        body { 
+            background: linear-gradient(135deg, #030303 0%, #0a0a15 100%);
+            color: #fff; 
+            margin: 0; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+        }
         
-        .glass { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #222; margin-bottom: 15px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; font-family: 'Orbitron'; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 900; background: var(--p); color: #000; cursor: pointer; text-transform: uppercase; }
-        .btn:hover { transform: scale(1.02); }
-        .btn:active { transform: scale(0.98); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .glass { 
+            background: rgba(13, 13, 13, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px; 
+            border-radius: 15px; 
+            border: 1px solid rgba(7, 255, 255, 0.2);
+            margin-bottom: 15px; 
+            box-shadow: 0 0 30px rgba(7, 255, 255, 0.1);
+        }
+        input, select, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(7, 255, 255, 0.3);
+            color: #fff; 
+            border-radius: 10px; 
+            font-family: 'Orbitron'; 
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus { 
+            outline: none;
+            border-color: var(--p);
+            box-shadow: 0 0 15px rgba(7, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.9);
+        }
+        .btn { 
+            width: 100%; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 12px; 
+            font-weight: 900; 
+            background: linear-gradient(135deg, var(--p) 0%, var(--blue) 100%);
+            color: #000; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(7, 255, 255, 0.3);
+        }
+        .btn:hover { 
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(7, 255, 255, 0.6);
+        }
+        .btn:active { 
+            transform: scale(0.98); 
+        }
+        .btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
 
-        .header { padding: 15px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #111; align-items: center; background: #000; }
-        .av { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--p); object-fit: cover; }
+        .header { 
+            padding: 20px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 2px solid rgba(7, 255, 255, 0.2);
+            align-items: center; 
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(13,13,13,0.6) 100%);
+            backdrop-filter: blur(10px);
+        }
+        .header-item {
+            text-align: left;
+        }
+        .header-item small { 
+            color: rgba(7, 255, 255, 0.6);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .header-item b { 
+            color: var(--p);
+            font-size: 18px;
+            display: block;
+            margin-top: 5px;
+        }
+        .av { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            border: 3px solid var(--p);
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(7, 255, 255, 0.4);
+        }
 
-        .view { flex: 1; padding: 20px; display: none; overflow-y: auto; padding-bottom: 90px; }
-        .view.active { display: block; animation: fade 0.3s ease; }
-        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+        .view { 
+            flex: 1; 
+            padding: 20px; 
+            display: none; 
+            overflow-y: auto; 
+            padding-bottom: 90px; 
+        }
+        .view.active { 
+            display: block; 
+            animation: slideIn 0.4s ease;
+        }
+        @keyframes slideIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
-        .orb { width: 160px; height: 160px; border-radius: 50%; border: 4px solid var(--g); margin: 30px auto; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; transition: 0.3s; }
-        .orb:hover { transform: scale(1.05); }
-        .orb.on { border-color: var(--r); animation: pulse 2s infinite; background: rgba(255, 51, 102, 0.1); }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .orb { 
+            width: 180px; 
+            height: 180px; 
+            border-radius: 50%; 
+            border: 4px solid var(--g); 
+            margin: 40px auto; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 900; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            background: radial-gradient(circle at 30% 30%, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0));
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3), inset 0 0 40px rgba(0, 255, 136, 0.1);
+            font-size: 16px;
+            color: var(--g);
+        }
+        .orb:hover { 
+            transform: scale(1.08);
+            box-shadow: 0 0 60px rgba(0, 255, 136, 0.5), inset 0 0 60px rgba(0, 255, 136, 0.2);
+        }
+        .orb.on { 
+            border-color: var(--r); 
+            animation: pulse 2s infinite;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 51, 102, 0.2), rgba(255, 51, 102, 0));
+            box-shadow: 0 0 40px rgba(255, 51, 102, 0.4), inset 0 0 40px rgba(255, 51, 102, 0.1);
+            color: var(--r);
+        }
+        @keyframes pulse { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0.7; } 
+        }
 
-        nav { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); background: #000; border-top: 1px solid #111; padding: 12px 0 25px; z-index: 50; }
-        .tab { text-align: center; color: #444; font-size: 22px; cursor: pointer; transition: 0.2s; }
-        .tab.active { color: var(--p); }
-        .tab span { display: block; font-size: 8px; text-transform: uppercase; margin-top: 4px; }
+        nav { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            border-top: 2px solid rgba(7, 255, 255, 0.2);
+            padding: 12px 0 25px; 
+            z-index: 50; 
+        }
+        .tab { 
+            text-align: center; 
+            color: rgba(100, 100, 100, 0.8);
+            font-size: 24px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            padding: 10px 5px;
+        }
+        .tab:hover {
+            color: var(--p);
+            transform: scale(1.1);
+        }
+        .tab.active { 
+            color: var(--p);
+            text-shadow: 0 0 10px var(--p);
+        }
+        .tab span { 
+            display: block; 
+            font-size: 8px; 
+            text-transform: uppercase; 
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
 
-        .friend-item { background: #000; padding: 10px; border-radius: 8px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; }
-        .friend-item:hover { border-color: var(--p); }
-        .friend-item button { width: 60px; padding: 8px; font-size: 11px; }
+        .friend-item, .device-item { 
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px; 
+            border-radius: 10px; 
+            margin: 8px 0; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid rgba(7, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .friend-item:hover, .device-item:hover { 
+            border-color: var(--p);
+            box-shadow: 0 0 15px rgba(7, 255, 255, 0.3);
+        }
+        .friend-item button, .device-btn { 
+            width: 60px; 
+            padding: 8px; 
+            font-size: 11px; 
+        }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid #222; max-width: 350px; width: 90%; }
+        .devices-list { 
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(7, 255, 255, 0.2);
+            border-radius: 12px; 
+            padding: 15px; 
+            margin: 15px 0; 
+        }
+        .device-item { 
+            padding: 12px; 
+            border-bottom: 1px solid rgba(7, 255, 255, 0.1);
+            font-size: 13px; 
+            color: rgba(200, 200, 200, 0.9);
+        }
+        .device-item.mining { 
+            color: var(--g); 
+            font-weight: bold;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        .device-item::before { 
+            content: "📱 ";
+            margin-right: 8px;
+        }
+        .device-item.mining::before { 
+            content: "⛏️ "; 
+        }
+        .device-item:last-child { 
+            border-bottom: none; 
+        }
 
-        .devices-list { background: #000; border: 1px solid #333; border-radius: 8px; padding: 10px; margin: 10px 0; }
-        .device-item { padding: 8px; border-bottom: 1px solid #222; font-size: 12px; color: #888; }
-        .device-item.mining { color: var(--g); font-weight: bold; }
-        .device-item::before { content: "📱 "; }
-        .device-item.mining::before { content: "⛏️ "; }
-        .device-item:last-child { border-bottom: none; }
+        .notification-item { 
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px; 
+            border-left: 4px solid var(--g); 
+            border-radius: 8px; 
+            margin: 8px 0; 
+            font-size: 12px; 
+            color: rgba(200, 200, 200, 0.95);
+            animation: slideIn 0.4s ease;
+        }
+        .notification-item.error { 
+            border-left-color: var(--r); 
+        }
+        .notification-item.warning { 
+            border-left-color: var(--gold); 
+        }
 
-        .notification-item { background: #000; padding: 10px; border-left: 3px solid var(--g); border-radius: 4px; margin: 8px 0; font-size: 12px; color: #ccc; }
-        .notification-item.error { border-left-color: var(--r); }
-        .notification-item.warning { border-left-color: var(--gold); }
+        .avatar-picker { 
+            display: flex; 
+            gap: 10px; 
+            margin: 15px 0; 
+            align-items: center; 
+            flex-wrap: wrap; 
+        }
+        .avatar-preview { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            border: 3px solid var(--p);
+            background: rgba(0, 0, 0, 0.8);
+            object-fit: cover;
+            box-shadow: 0 0 15px rgba(7, 255, 255, 0.3);
+        }
+        #avatar-file { 
+            display: none; 
+        }
 
-        .avatar-picker { display: flex; gap: 10px; margin: 10px 0; align-items: center; flex-wrap: wrap; }
-        .avatar-preview { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--p); background: #000; object-fit: cover; }
-        #avatar-file { display: none; }
+        .internet-status { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            padding: 12px; 
+            text-align: center; 
+            font-size: 13px; 
+            z-index: 200;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .internet-status.offline { 
+            background: linear-gradient(90deg, var(--r), #ff6b9d);
+            color: #fff;
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.4);
+        }
+        .internet-status.online { 
+            background: linear-gradient(90deg, var(--g), #00d66a);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
 
-        .internet-status { position: fixed; top: 0; left: 0; right: 0; padding: 10px; text-align: center; font-size: 12px; z-index: 200; }
-        .internet-status.offline { background: var(--r); color: #fff; }
-        .internet-status.online { background: var(--g); color: #000; }
+        /* РУЛЕТКА */
+        .roulette-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .roulette-wheel {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #ff3366 0deg 120deg,
+                #111111 120deg 240deg,
+                #00ff88 240deg 360deg
+            );
+            border: 5px solid var(--p);
+            box-shadow: 0 0 60px rgba(7, 255, 255, 0.4), inset 0 0 40px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: spin 0.1s linear infinite;
+        }
+
+        .roulette-wheel::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: var(--p);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--p), inset 0 0 10px rgba(255, 255, 255, 0.5);
+            z-index: 10;
+        }
+
+        .roulette-wheel.spinning {
+            animation: spinWheel 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes spinWheel {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(1080deg); }
+        }
+
+        .roulette-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid var(--p);
+            filter: drop-shadow(0 0 10px var(--p));
+            z-index: 20;
+        }
+
+        .roulette-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .roulette-bet {
+            display: flex;
+            gap: 10px;
+        }
+
+        .bet-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 900;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .bet-btn.red {
+            border-color: var(--r);
+            color: var(--r);
+        }
+
+        .bet-btn.red:hover {
+            background: rgba(255, 51, 102, 0.2);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.4);
+        }
+
+        .bet-btn.black {
+            border-color: #999;
+            color: #999;
+        }
+
+        .bet-btn.black:hover {
+            background: rgba(153, 153, 153, 0.2);
+            box-shadow: 0 0 20px rgba(153, 153, 153, 0.4);
+        }
+
+        .bet-btn.green {
+            border-color: var(--g);
+            color: var(--g);
+        }
+
+        .bet-btn.green:hover {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        h1 {
+            background: linear-gradient(135deg, var(--p), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(7, 255, 255, 0.3);
+        }
+
+        h3 {
+            color: var(--p);
+            text-shadow: 0 0 10px rgba(7, 255, 255, 0.3);
+        }
+
+        h4 {
+            color: var(--p);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
 
         @media (max-width: 480px) {
-            .view { padding: 15px; padding-bottom: 80px; }
-            input, select, textarea, .btn { padding: 11px; font-size: 13px; }
-            .orb { width: 140px; height: 140px; margin: 25px auto; font-size: 14px; }
-            h1 { font-size: 2rem; }
+            .view { 
+                padding: 15px; 
+                padding-bottom: 100px; 
+            }
+            input, select, textarea, .btn { 
+                padding: 11px; 
+                font-size: 12px; 
+            }
+            .orb { 
+                width: 140px; 
+                height: 140px; 
+                margin: 25px auto; 
+                font-size: 12px; 
+            }
+            h1 { 
+                font-size: 2rem; 
+            }
+            .roulette-wheel {
+                width: 200px;
+                height: 200px;
+            }
+            .tab {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
@@ -75,110 +484,133 @@
 <div class="internet-status" id="internet-status" style="display: none;"></div>
 
 <div id="auth-scr" style="height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;">
-    <div class="glass" style="width:100%; max-width:320px; text-align:center;">
-        <h2 style="letter-spacing:5px; margin-bottom:30px; font-size:1.8rem;">STICK<span style="color:var(--p)">FARM</span></h2>
+    <div class="glass" style="width:100%; max-width:380px; text-align:center;">
+        <h2 style="letter-spacing:5px; margin-bottom:30px; font-size:2.2rem; background: linear-gradient(135deg, var(--p), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">STICK<span style="color:var(--gold);">FARM</span></h2>
         
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <button class="btn" id="tab-login" onclick="switchAuth('login')" style="background:var(--p); color:#000;">ВХІД</button>
-            <button class="btn" id="tab-register" onclick="switchAuth('register')" style="background:#222; color:#fff;">РЕЄСТР</button>
+            <button class="btn" id="tab-login" onclick="switchAuth('login')" style="background: linear-gradient(135deg, var(--p), var(--blue)); color:#000;">ВХІД</button>
+            <button class="btn" id="tab-register" onclick="switchAuth('register')" style="background: rgba(7, 255, 255, 0.1); color:var(--p); border: 2px solid var(--p);">РЕЄСТР</button>
         </div>
 
         <div id="login-form">
             <input type="text" id="login-u" placeholder="ЛОГІН">
             <input type="password" id="login-p" placeholder="ПАРОЛЬ">
-            <button class="btn" onclick="auth('login')">УВІЙТИ</button>
+            <button class="btn" onclick="auth('login')" style="margin-top: 15px;">УВІЙТИ</button>
         </div>
 
         <div id="register-form" style="display:none;">
             <input type="text" id="reg-u" placeholder="ЛОГІН">
             <input type="password" id="reg-p" placeholder="ПАРОЛЬ">
             <input type="password" id="reg-p2" placeholder="ПОВТОРИТИ">
-            <button class="btn" onclick="auth('register')">РЕЄСТРАЦІЯ</button>
+            <button class="btn" onclick="auth('register')" style="margin-top: 15px;">РЕЄСТРАЦІЯ</button>
         </div>
     </div>
 </div>
 
 <div id="main-scr" style="display:none; flex-direction:column; height:100vh;">
     <div class="header">
-        <div><small style="color:#555;">OPERATOR</small><br><b id="h-u">---</b></div>
-        <div style="text-align:right;"><small style="color:#555;">BALANCE</small><br><b id="h-b" style="color:var(--g);">0.0000</b></div>
+        <div class="header-item">
+            <small>ОПЕРАТОР</small>
+            <b id="h-u">---</b>
+        </div>
+        <div style="flex:1; text-align: center;">
+            <h1 id="v-bal" style="font-size:2.5rem; margin: 0; text-shadow: 0 0 20px rgba(7, 255, 255, 0.4);">0.0000</h1>
+        </div>
+        <div class="header-item" style="text-align: right;">
+            <small>БАЛАНС</small>
+            <b id="h-b" style="color:var(--g);">0.0000</b>
+        </div>
         <img id="h-a" class="av" src="" alt="avatar">
     </div>
 
     <div id="tab1" class="view active">
-        <h1 id="v-bal" style="text-align:center; font-size:3.5rem; margin:30px 0; font-weight:900;">0.0000</h1>
+        <div style="text-align:center; margin-bottom: 10px;">
+            <small style="color: rgba(7, 255, 255, 0.6); letter-spacing: 2px;">⛏️ РЕЖИМ МАЙНІНГУ</small>
+        </div>
         <div id="mbtn" class="orb" onclick="toggleMine()">START<br>MINING</div>
-        <div style="text-align:center; font-size:12px; color:#555; margin-bottom:20px;">+0.0001 STICK/сек<br>на кожен пристрій</div>
+        <div style="text-align:center; font-size:12px; color:rgba(7, 255, 255, 0.6); margin-bottom:20px;">
+            <span style="display: block; margin-bottom: 5px;">+0.0001 STICK/сек</span>
+            <span style="display: block;">на кожен пристрій</span>
+        </div>
         
         <div class="glass" style="margin-top: 20px;">
-            <h3 style="margin-top: 0; color: var(--p); font-size: 14px;">📱 АКТИВНІ ПРИСТРОЇ</h3>
+            <h3 style="margin-top: 0; font-size: 14px;">📱 АКТИВНІ ПРИСТРОЇ</h3>
             <div id="devices-list" class="devices-list" style="min-height: 60px;">
-                <div style="font-size: 12px; color: #888; text-align: center; padding: 10px;">завантаження...</div>
+                <div style="font-size: 12px; color: rgba(200, 200, 200, 0.5); text-align: center; padding: 10px;">завантаження...</div>
             </div>
         </div>
     </div>
 
     <div id="tab2" class="view">
-        <h3 style="color:var(--p); margin-top:0;">💳 TRANSFER</h3>
+        <h3 style="margin-top:0;">💳 TRANSFER</h3>
         <div class="glass">
             <input type="text" id="transfer-user" placeholder="Логін отримувача">
             <input type="number" id="transfer-amount" placeholder="0.0000" min="0.0001" step="0.0001">
             <textarea id="transfer-message" placeholder="Повідомлення (опціонально)" style="height: 60px; resize: none;"></textarea>
-            <button class="btn" onclick="transferCoins()">ВІДПРАВИТИ</button>
+            <button class="btn" onclick="transferCoins()" style="margin-top: 15px;">ВІДПРАВИТИ</button>
         </div>
     </div>
 
     <div id="tab3" class="view">
-        <h3 style="margin-top:0;">🎰 CASINO</h3>
-        <div class="glass" style="text-align:center;">
-            <input type="number" id="bet-amt" placeholder="СТАВКА" min="0.0001" step="0.0001">
-            <div style="display:flex; gap:5px;">
-                <button class="btn" style="background:var(--r); color:#fff;" onclick="spin('red')">RED</button>
-                <button class="btn" style="background:#111; border:1px solid #333; color:#fff;" onclick="spin('black')">BLACK</button>
-                <button class="btn" style="background:var(--g); color:#000;" onclick="spin('green')">0</button>
+        <h3 style="margin-top:0;">🎰 КАЗИНО - РУЛЕТКА</h3>
+        <div class="glass">
+            <div class="roulette-container">
+                <div style="position: relative; width: 100%; display: flex; justify-content: center;">
+                    <div class="roulette-pointer"></div>
+                    <div id="roulette-wheel" class="roulette-wheel"></div>
+                </div>
+
+                <div class="roulette-controls">
+                    <input type="number" id="bet-amt" placeholder="СТАВКА" min="0.0001" step="0.0001">
+                    <div class="roulette-bet">
+                        <button class="bet-btn red" onclick="spin('red')">🔴 RED</button>
+                        <button class="bet-btn black" onclick="spin('black')">⚫ BLACK</button>
+                        <button class="bet-btn green" onclick="spin('green')">🟢 0</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="tab4" class="view">
         <h3 style="margin-top:0;">👥 ДРУЗІ</h3>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; margin-bottom: 15px;">
             <input type="text" id="f-u" placeholder="Логін...">
-            <button class="btn" style="width:80px;" onclick="sendFriendRequest()">ADD</button>
+            <button class="btn" style="width:100px; padding: 12px;" onclick="sendFriendRequest()">+ ДОДАТИ</button>
         </div>
-        <h3 style="margin-top:20px; color:var(--g);">ЗАПИТИ</h3>
+        <h3 style="margin-top:20px; color:var(--g); font-size: 13px;">📨 ЗАПИТИ</h3>
         <div id="f-requests"></div>
-        <h3 style="margin-top:20px; color:var(--g);">МОЇ ДРУЗІ</h3>
+        <h3 style="margin-top:20px; color:var(--g); font-size: 13px;">👥 МОЇ ДРУЗІ</h3>
         <div id="f-list"></div>
     </div>
 
     <div id="tab5" class="view">
-        <h3>⚙️ CONFIG</h3>
+        <h3 style="margin-top:0;">⚙️ НАЛАШТУВАННЯ</h3>
         
-        <h4 style="margin-top: 20px; color: var(--p); font-size: 12px;">📱 ПРИСТРОЇ</h4>
+        <h4 style="margin-top: 25px; margin-bottom: 15px;">📱 ПРИСТРОЇ</h4>
         <div class="glass">
-            <label style="font-size:10px; color:var(--p);">НАЗВА НОВОГО ПРИСТРОЮ</label>
+            <label style="font-size:11px; color:var(--p); text-transform: uppercase; letter-spacing: 1px;">НАЗВА НОВОГО ПРИСТРОЮ</label>
             <input type="text" id="device-name" placeholder="e.g. iPhone, PC">
-            <button class="btn" onclick="registerDevice()" style="margin-top:10px; background: var(--g); color: #000;">+ ДОДАТИ ПРИСТРІЙ</button>
+            <button class="btn" onclick="registerDevice()" style="margin-top:12px; background: linear-gradient(135deg, var(--g), #00d66a);">+ ДОДАТИ ПРИСТРІЙ</button>
             <div id="devices-config" style="margin-top: 15px;"></div>
         </div>
 
-        <h4 style="margin-top: 20px; color: var(--p); font-size: 12px;">🖼️ АВАТАР</h4>
+        <h4 style="margin-top: 25px; margin-bottom: 15px;">🖼️ АВАТАР</h4>
         <div class="glass">
             <div class="avatar-picker">
                 <img id="avatar-preview" class="avatar-preview" src="" alt="avatar">
-                <button class="btn" style="flex: 1;" onclick="document.getElementById('avatar-file').click()">ВИБРАТИ З ГАЛЕРЕЇ</button>
+                <button class="btn" style="flex: 1; padding: 12px;" onclick="document.getElementById('avatar-file').click()">ВИБРАТИ З ГАЛЕРЕЇ</button>
                 <input type="file" id="avatar-file" accept="image/*">
             </div>
-            <button class="btn" onclick="saveAvatarConfig()" style="margin-top:10px;">ЗБЕРЕГТИ</button>
+            <button class="btn" onclick="saveAvatarConfig()" style="margin-top:12px;">ЗБЕРЕГТИ АВАТАР</button>
         </div>
 
-        <h4 style="margin-top: 20px; color: var(--p); font-size: 12px;">🔔 СПОВІЩЕННЯ</h4>
-        <div id="notifications-container" class="glass" style="max-height: 200px; overflow-y: auto; min-height: 100px;">
-            <div style="font-size: 12px; color: #555; text-align: center; padding: 20px;">сповіщень немає</div>
+        <h4 style="margin-top: 25px; margin-bottom: 15px;">🔔 СПОВІЩЕННЯ</h4>
+        <div id="notifications-container" class="glass" style="max-height: 220px; overflow-y: auto; min-height: 100px;">
+            <div style="font-size: 12px; color: rgba(200, 200, 200, 0.5); text-align: center; padding: 20px;">сповіщень немає</div>
         </div>
 
-        <button class="btn" onclick="logout()" style="background:var(--r); color:#fff; margin-top:20px;">ВИХІД</button>
+        <button class="btn" onclick="logout()" style="background: linear-gradient(135deg, var(--r), #ff6b9d); color:#fff; margin-top:25px;">ВИХІД</button>
     </div>
 
     <nav>
@@ -208,7 +640,6 @@
         isOnline: navigator.onLine
     };
 
-    // Перевірка інтернету
     function checkInternet() {
         const status = navigator.onLine;
         gameState.isOnline = status;
@@ -230,7 +661,6 @@
     window.addEventListener('offline', checkInternet);
     checkInternet();
 
-    // Сповіщення
     function addNotification(message, type = 'success') {
         const notification = { id: Date.now(), message, type, time: new Date().toLocaleTimeString() };
         gameState.notifications.unshift(notification);
@@ -241,12 +671,12 @@
     function updateNotifications() {
         const container = document.getElementById('notifications-container');
         if (gameState.notifications.length === 0) {
-            container.innerHTML = '<div style="font-size: 12px; color: #555; text-align: center; padding: 20px;">сповіщень немає</div>';
+            container.innerHTML = '<div style="font-size: 12px; color: rgba(200, 200, 200, 0.5); text-align: center; padding: 20px;">сповіщень немає</div>';
             return;
         }
         container.innerHTML = gameState.notifications.map(n => `
             <div class="notification-item ${n.type}">
-                <span style="color: #555; font-size: 10px;">[${n.time}]</span><br>
+                <span style="color: rgba(200, 200, 200, 0.6); font-size: 11px; letter-spacing: 1px;">[${n.time}]</span><br>
                 ${n.message}
             </div>
         `).join('');
@@ -262,16 +692,16 @@
         if (type === 'login') {
             loginForm.style.display = 'block';
             registerForm.style.display = 'none';
-            tabLogin.style.background = 'var(--p)';
+            tabLogin.style.background = 'linear-gradient(135deg, var(--p), var(--blue))';
             tabLogin.style.color = '#000';
-            tabRegister.style.background = '#222';
-            tabRegister.style.color = '#fff';
+            tabRegister.style.background = 'rgba(7, 255, 255, 0.1)';
+            tabRegister.style.color = 'var(--p)';
         } else {
             loginForm.style.display = 'none';
             registerForm.style.display = 'block';
-            tabLogin.style.background = '#222';
-            tabLogin.style.color = '#fff';
-            tabRegister.style.background = 'var(--p)';
+            tabLogin.style.background = 'rgba(7, 255, 255, 0.1)';
+            tabLogin.style.color = 'var(--p)';
+            tabRegister.style.background = 'linear-gradient(135deg, var(--p), var(--blue))';
             tabRegister.style.color = '#000';
         }
     }
@@ -345,7 +775,6 @@
         });
 
         socket.on('auth_success', (data) => {
-            console.log('✓ Автентифіковано:', data.username);
             gameState.devices = data.devices || [];
             updateDevicesConfig();
             updateDevicesList(gameState.devices);
@@ -353,7 +782,7 @@
 
         socket.on('balance_update', (data) => {
             gameState.balance = data.balance;
-            addNotification(`💰 Баланс оновлено: +${data.income?.toFixed(4) || 0} STICK`, 'success');
+            addNotification(`💰 Баланс: +${data.income?.toFixed(4) || 0} STICK`, 'success');
             updateHeader();
         });
 
@@ -361,12 +790,12 @@
             gameState.devices = devices;
             updateDevicesList(devices);
             updateDevicesConfig();
-            addNotification(`📱 Оновлення пристроїв: ${devices.length} активних`, 'success');
+            addNotification(`📱 ${devices.length} активних пристроїв`, 'success');
         });
 
         socket.on('friend_request_received', (data) => {
             gameState.friendRequests.push(data.from);
-            addNotification(`👥 Запит дружби від ${data.from}`, 'success');
+            addNotification(`👥 Запит від ${data.from}`, 'success');
             updateFriendRequestsList();
         });
 
@@ -376,31 +805,35 @@
         });
 
         socket.on('transfer_success', (data) => {
-            addNotification(`✓ Надіслано ${data.amount.toFixed(4)} STICK користувачу ${data.recipient}`, 'success');
+            addNotification(`✓ Надіслано ${data.amount.toFixed(4)} STICK до ${data.recipient}`, 'success');
             document.getElementById('transfer-user').value = '';
             document.getElementById('transfer-amount').value = '';
             document.getElementById('transfer-message').value = '';
         });
 
         socket.on('transfer_received', (data) => {
-            addNotification(`💰 Отримано ${data.amount.toFixed(4)} STICK від ${data.sender}${data.message ? ': ' + data.message : ''}`, 'success');
+            addNotification(`💰 +${data.amount.toFixed(4)} від ${data.sender}${data.message ? ': ' + data.message : ''}`, 'success');
             gameState.balance = data.newBalance;
             updateHeader();
         });
 
         socket.on('spin_result', (data) => {
-            if (data.won) {
-                addNotification(`🎉 ВИ ВИГРАЛИ ${data.winAmount.toFixed(4)} STICK!`, 'success');
-            } else {
-                addNotification(`❌ Ви програли ставку`, 'error');
-            }
+            const wheel = document.getElementById('roulette-wheel');
+            wheel.classList.remove('spinning');
+            setTimeout(() => {
+                if (data.won) {
+                    addNotification(`🎉 ВИГРАЛИ ${data.winAmount.toFixed(4)} STICK!`, 'success');
+                } else {
+                    addNotification(`❌ Програли ставку`, 'error');
+                }
+            }, 100);
             gameState.balance = data.newBalance;
             updateHeader();
         });
 
         socket.on('mining_income', (data) => {
             gameState.balance = data.newBalance;
-            addNotification(`⛏️ Дохід з ${data.deviceName}: +${data.income.toFixed(4)} STICK`, 'success');
+            addNotification(`⛏️ ${data.deviceName}: +${data.income.toFixed(4)}`, 'success');
             updateHeader();
         });
 
@@ -426,13 +859,16 @@
     function updateDevicesList(devices) {
         const listDiv = document.getElementById('devices-list');
         if (!devices || devices.length === 0) {
-            listDiv.innerHTML = '<div style="font-size:12px; color:#888; text-align:center; padding:10px;">немає активних пристроїв</div>';
+            listDiv.innerHTML = '<div style="font-size:12px; color: rgba(200, 200, 200, 0.5); text-align:center; padding:10px;">немає активних пристроїв</div>';
             return;
         }
         listDiv.innerHTML = devices.map(d => `
             <div class="device-item ${d.mining ? 'mining' : ''}">
-                ${d.name} ${d.mining ? '(майнить...)' : ''} 
-                <span style="color: #555; font-size: 10px;">(+${(0.0001 * (d.mining ? 1 : 0)).toFixed(4)} STICK/s)</span>
+                <div>
+                    <strong>${d.name}</strong>
+                    ${d.mining ? ' <span style="color: var(--g); margin-left: 10px;">(⛏️ MINING)</span>' : ''}
+                    <div style="color: rgba(200, 200, 200, 0.6); font-size: 11px; margin-top: 4px;">+${(0.0001 * (d.mining ? 1 : 0)).toFixed(4)} STICK/s</div>
+                </div>
             </div>
         `).join('');
     }
@@ -440,15 +876,16 @@
     function updateDevicesConfig() {
         const container = document.getElementById('devices-config');
         if (gameState.devices.length === 0) {
-            container.innerHTML = '<div style="font-size: 12px; color: #555; text-align: center; padding: 10px;">немає привязаних пристроїв</div>';
+            container.innerHTML = '<div style="font-size: 12px; color: rgba(200, 200, 200, 0.5); text-align: center; padding: 10px;">немає привязаних пристроїв</div>';
             return;
         }
         container.innerHTML = gameState.devices.map((d, idx) => `
-            <div style="padding: 8px; background: #000; border-left: 2px solid ${d.mining ? 'var(--g)' : '#333'}; margin: 5px 0; border-radius: 4px;">
-                <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                    <span>${d.name} ${d.mining ? '⛏️ MINING' : '📱'}</span>
-                    <button class="btn" style="width: 60px; padding: 6px; background: var(--r); color: #fff; font-size: 10px;" onclick="removeDevice('${d.id}')">ВИДАЛИТИ</button>
+            <div style="padding: 12px; background: rgba(0, 0, 0, 0.6); border-left: 3px solid ${d.mining ? 'var(--g)' : 'rgba(7, 255, 255, 0.2)'}; margin: 8px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>${d.name}</strong>
+                    ${d.mining ? ' <span style="color: var(--g); margin-left: 8px;">⛏️ MINING</span>' : ' <span style="color: rgba(200, 200, 200, 0.6);">📱</span>'}
                 </div>
+                <button class="btn" style="width: 80px; padding: 8px; background: linear-gradient(135deg, var(--r), #ff6b9d); color: #fff; font-size: 10px;" onclick="removeDevice('${d.id}')">ВИДАЛИТИ</button>
             </div>
         `).join('');
     }
@@ -524,13 +961,13 @@
     function updateFriendRequestsList() {
         const div = document.getElementById('f-requests');
         if (gameState.friendRequests.length === 0) {
-            div.innerHTML = '<p style="font-size:11px; color:#555;">немає запитів</p>';
+            div.innerHTML = '<p style="font-size:11px; color: rgba(200, 200, 200, 0.5);">немає запитів</p>';
             return;
         }
         div.innerHTML = gameState.friendRequests.map((friend, idx) => `
             <div class="friend-item">
                 <span>${friend}</span>
-                <button class="btn" onclick="acceptFriend('${friend}')" style="width:50px; padding:6px; background:var(--g); color:#000; font-size:10px;">✓</button>
+                <button class="btn" onclick="acceptFriend('${friend}')" style="width:50px; padding:8px; background: linear-gradient(135deg, var(--g), #00d66a); color:#000; font-size:10px;">✓</button>
             </div>
         `).join('');
     }
@@ -544,12 +981,12 @@
     function updateFriendsList() {
         const div = document.getElementById('f-list');
         if (gameState.friends.length === 0) {
-            div.innerHTML = '<p style="font-size:11px; color:#555;">немає друзів</p>';
+            div.innerHTML = '<p style="font-size:11px; color: rgba(200, 200, 200, 0.5);">немає друзів</p>';
             return;
         }
         div.innerHTML = gameState.friends.map(friend => `
             <div class="friend-item">
-                <span>${friend}</span>
+                <span>👤 ${friend}</span>
             </div>
         `).join('');
     }
@@ -565,10 +1002,12 @@
             alert('Введіть ставку!');
             return;
         }
+
+        const wheel = document.getElementById('roulette-wheel');
+        wheel.classList.add('spinning');
         socket.emit('spin_wheel', { betAmount, color });
     }
 
-    // Аватар з галереї
     document.getElementById('avatar-file').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
